@@ -75,7 +75,21 @@ class TestGetData(unittest.TestCase):
 class TestGetColumnIndex(unittest.TestCase):
 
     def test_name_present(self):
-        pass
+        header = ['Area', 'Year', 'Forest fires']
+        for name, expected in [('Area', 0), ('Year', 1), ('Forest fires', 2)]:
+            with self.subTest(name=name):
+                self.assertEqual(
+                    fire_gdp.get_column_index(header, name), expected,
+                )
+
+    def test_name_absent(self):
+        self.assertIsNone(
+            fire_gdp.get_column_index(['Area', 'Year', 'Forest fires'], 'GDP'),
+        )
+
+    def test_empty_header(self):
+        self.assertIsNone(fire_gdp.get_column_index([], 'Area'))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -27,7 +27,11 @@ def get_data(file_name,
 
 
 def get_column_index(header, column_name):
-    pass
+    """Return the zero-based column index, or None if the name is absent."""
+    try:
+        return header.index(column_name)
+    except ValueError:
+        return None
 
 
 def get_fire_gdp_year_data(co2_file, gdp_file, country):
