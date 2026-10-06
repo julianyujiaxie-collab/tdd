@@ -1,0 +1,44 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -leo pipefail {0}
+    env:
+      PYTHONPATH: ${{ github.workspace }}/src
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHON: python
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up swe4s environment
+        id: setup_environment
+        uses: mamba-org/setup-micromamba@v3
+        with:
+          environment-file: environment.yml
+          environment-name: swe4s
+          init-shell: bash
+          cache-environment: true
+
+      - name: Run all unit tests
+        run: python -m unittest discover -s test/unit -p 'test_*.py' -v
+
+      - name: Run all functional tests
+        if: ${{ !cancelled() && steps.setup_environment.outcome == 'success' }}
+        run: |
+          status=0
+          for test_script in test/func/test_*.sh; do
+            bash "$test_script" || status=1
+          done
+          exit "$status"
