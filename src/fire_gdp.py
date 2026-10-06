@@ -35,4 +35,34 @@ def get_column_index(header, column_name):
 
 
 def get_fire_gdp_year_data(co2_file, gdp_file, country):
-    pass
+    """Return [int year, float forest fires, float GDP] rows for one country.
+
+    Match years using the GDP header and preserve the CO2 row order. Skip
+    missing values or years, and return [] if either file lacks the country.
+    """
+    co2_rows, co2_header = get_data(
+        co2_file, query_column=0, query_value=country, return_header=True,
+    )
+    gdp_rows, gdp_header = get_data(
+        gdp_file, query_column=0, query_value=country, return_header=True,
+    )
+    if not co2_rows or not gdp_rows:
+        return []
+
+    fire_column = get_column_index(co2_header, 'Forest fires')
+    gdp_row = gdp_rows[0]
+    result = []
+    for co2_row in co2_rows:
+        year = co2_row[1]
+        gdp_column = get_column_index(gdp_header, year)
+        if gdp_column is None:
+            continue
+
+        forest_fires = co2_row[fire_column]
+        gdp = gdp_row[gdp_column]
+        if forest_fires == '' or gdp == '':
+            continue
+
+        result.append([int(year), float(forest_fires), float(gdp)])
+
+    return result
